@@ -1,4 +1,4 @@
-# MFA-Project
+# SecureHub
 Voici le projet de :
 - Joris FAURIE
 - Nolwenn GANCHE

@@ -1,10 +1,4 @@
 # SecureHub
-Voici le projet de :
-- Joris FAURIE
-- Nolwenn GANCHE
-- Maroua KHALED
-- Ulysse JOSSELIN-CORBY
-
 Version : 1.0
 Démarrage du projet : Octobre 2024
 Date de finalisation prévue : Juin 2025
@@ -12,9 +6,9 @@ Date de finalisation prévue : Juin 2025
 Table des matières : 
 
     - Description générale
+    - Contributeurs
     - Contexte et Objectifs
     - Fonctionnalités
-    - Contributeurs
     - Installation et Déploiement
     - Documentation et Utilisation
 
@@ -22,6 +16,12 @@ Description générale
 
 SecureHub est une solution de gestion centralisée de l'authentification multi-facteurs (2FA) destinée aux entreprises devant se conformer à la directive NIS2 et/ou cherchant à sécuriser efficacement les accès à leurs systèmes. 
 Elle propose une interface auto-hébergée, facilement configurable et adaptée aux environnements multi-applications, permettant une gestion unifiée et sécurisée du 2FA.
+
+Contributeurs  
+  - Nolwenn : Développeuse Frontend
+  - Joris : Développeur Backend
+  - Ulysse : Expert en Cybersécurité
+  - Maroua : Responsable de la gestion de projet et commerciale
 
 Contexte et Objectifs
 
@@ -42,10 +42,6 @@ SecureHub propose les fonctionnalités suivantes :
     Journalisation des accès : Suivi des activités pour une traçabilité complète.
     Chiffrement des données : Mécanismes avancés de protection pour garantir la confidentialité et l’intégrité des informations d’authentification.
 
-Contributeurs  
-  Nolwenn : Développeuse Frontend
-  Joris : Développeur Backend
-  Ulysse : Expert en Cybersécurité
-  Maroua : Responsable de la gestion de projet et commerciale
+
 
   

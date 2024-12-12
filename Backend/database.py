@@ -20,10 +20,15 @@ strSQLInsert = """
 def init_db():
     # Créer la table 'users' si elle n'existe pas
     with db.connect() as conn:
+        conn.execute(text(strSQLCreate))
         conn.commit()
 
     # Insérer une ligne de données dans la table 'users'
+
+def insert_db():
     with db.connect() as conn:
-        conn.commit()  # Commit des changements
+        conn.execute(text(strSQLInsert))
+        conn.commit()
+    
         
 

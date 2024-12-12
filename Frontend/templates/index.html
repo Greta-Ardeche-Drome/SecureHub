@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Application Flask</title>
+</head>
+<body>
+    <h1>Ajouter un utilisateur</h1>
+    <!-- Formulaire avec un bouton qui envoie une requête POST à la route /insert -->
+    <form method="POST" action="{{ url_for('insert_data') }}">
+        <button type="submit">Ajouter un utilisateur</button>
+    </form>
+</body>
+</html>

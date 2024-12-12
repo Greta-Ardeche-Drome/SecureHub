@@ -1,12 +1,29 @@
-from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import create_engine, text
 
-db = SQLAlchemy()
+# Créer l'engine pour la base de données SQLite
+db = create_engine("sqlite:///app.db", echo=True, future=True)
 
-def init_db(app):
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'  # Base de données SQLite
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    db.init_app(app)
-    
-    with app.app_context():
-        db.create_all()  # Crée les tables si elles n'existent pas déjà
-        print("La base de données a été initialisée avec succès.")
+# Définir la requête SQL pour créer la table
+strSQLCreate = """
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY, 
+            name VARCHAR(255) NOT NULL,
+            password VARCHAR(255) NOT NULL
+        );
+        """
+
+# Définir la requête SQL pour insérer des données
+strSQLInsert = """
+        INSERT INTO users (name, password) VALUES ('Joris', 'test');
+        """
+
+def init_db():
+    # Créer la table 'users' si elle n'existe pas
+    with db.connect() as conn:
+        conn.commit()
+
+    # Insérer une ligne de données dans la table 'users'
+    with db.connect() as conn:
+        conn.commit()  # Commit des changements
+        
+

@@ -1,5 +1,4 @@
 from flask import Blueprint, request, jsonify
-import pyotp
 from models import db, User
 
 auth = Blueprint('auth', __name__)

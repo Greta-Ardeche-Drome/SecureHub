@@ -1,4 +1,5 @@
 from sqlalchemy import create_engine, text
+from werkzeug.security import generate_password_hash, check_password_hash
 
 # Créer l'engine pour la base de données SQLite
 db = create_engine("sqlite:///app.db", echo=True, future=True)
@@ -7,14 +8,9 @@ db = create_engine("sqlite:///app.db", echo=True, future=True)
 strSQLCreate = """
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY, 
-            name VARCHAR(255) NOT NULL,
+            name VARCHAR(255) NOT NULL UNIQUE,
             password VARCHAR(255) NOT NULL
         );
-        """
-
-# Définir la requête SQL pour insérer des données
-strSQLInsert = """
-        INSERT INTO users (name, password) VALUES ('Joris', 'test');
         """
 
 def init_db():
@@ -23,12 +19,29 @@ def init_db():
         conn.execute(text(strSQLCreate))
         conn.commit()
 
-    # Insérer une ligne de données dans la table 'users'
-
-def insert_db():
+def insert_user(name, password):
+    # Ajouter un utilisateur avec un mot de passe haché
+    hashed_password = generate_password_hash(password)
+    strSQLInsert = """
+        INSERT INTO users (name, password) VALUES (:name, :password);
+        """
     with db.connect() as conn:
-        conn.execute(text(strSQLInsert))
-        conn.commit()
-    
-        
+        try:
+            conn.execute(text(strSQLInsert), {"name": name, "password": hashed_password})
+            conn.commit()
+        except Exception as e:
+            print(f"Erreur lors de l'insertion : {e}")
 
+def get_user_by_name(name):
+    # Récupérer un utilisateur par son nom
+    strSQLSelect = "SELECT * FROM users WHERE name = :name;"
+    with db.connect() as conn:
+        result = conn.execute(text(strSQLSelect), {"name": name}).fetchone()
+        return result
+
+def add_user_test():
+    
+    insert_user("user1", "password1")
+    insert_user("user2", "password2")
+
+    print("Utilisateurs ajoutés avec succès !")

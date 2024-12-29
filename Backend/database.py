@@ -41,7 +41,7 @@ def get_user_by_name(name):
 
 def add_user_test():
     
-    insert_user("user1", "password1")
-    insert_user("user2", "password2")
+    insert_user("Nono", "password63")
+    insert_user("Jojo", "password64")
 
     print("Utilisateurs ajoutés avec succès !")

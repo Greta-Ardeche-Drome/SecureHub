@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code TOTP</title>
+    <script>
+        // Fonction pour actualiser le code TOTP toutes les 30 secondes
+        async function fetchTOTP() {
+            const response = await fetch('/totp-code');
+            const data = await response.json();
+            document.getElementById('totp-code').innerText = data.totp_code;
+        }
+
+        // Actualisation automatique
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchTOTP();
+            setInterval(fetchTOTP, 30000); // Mise à jour toutes les 30 secondes
+        });
+    </script>
+</head>
+<body>
+    <h2>Bienvenue, {{ username }} (Utilisateur)</h2>
+    <p>Voici votre code TOTP :</p>
+    <h1 id="totp-code">{{ totp_code }}</h1>
+    <p>Ce code est valable 30 secondes.</p>
+    <a href="/logout">Déconnexion</a>
+</body>
+</html>

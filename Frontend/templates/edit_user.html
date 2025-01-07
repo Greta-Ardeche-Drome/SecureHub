@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modifier un utilisateur</title>
+</head>
+<body>
+    <h2>Modifier un utilisateur</h2>
+    <form action="" method="post">
+        <label for="name">Nom :</label>
+        <input type="text" id="name" name="name" value="{{ user.name }}" required><br><br>
+        <label for="password">Mot de passe :</label>
+        <input type="password" id="password" name="password" required><br><br>
+        <label for="role">Rôle :</label>
+        <select id="role" name="role">
+            <option value="user" {% if user.role == 'user' %}selected{% endif %}>Utilisateur</option>
+            <option value="admin" {% if user.role == 'admin' %}selected{% endif %}>Administrateur</option>
+        </select><br><br>
+        <button type="submit">Modifier</button>
+    </form><br>
+    <a href="/admin/users">Retour</a>
+</body>
+</html>

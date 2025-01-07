@@ -1,5 +1,5 @@
 from flask import Flask, render_template, redirect, url_for, request, session, flash, jsonify
-from database import init_db, get_user_by_name, add_test
+from database import init_db, get_user_by_name, add_test, get_all_users, add_user, update_user, get_user_by_id, delete_user
 from werkzeug.security import check_password_hash
 from totp_utils import generate_totp
 import os
@@ -65,6 +65,57 @@ def admin_page():
     totp_code = generate_totp()
     return render_template('admin_page.html', username=session['username'], totp_code=totp_code)
 
+@app.route('/admin/users', methods=['GET'])
+def admin_users():
+    if 'role' not in session or session['role'] != 'admin':
+        flash("Accès interdit.", 'error')
+        return redirect(url_for('login'))
+
+    # Récupérer tous les utilisateurs
+    users = get_all_users()
+    return render_template('admin_users_table.html', users=users)
+
+@app.route('/admin/users/add', methods=['GET', 'POST'])
+def add_user_page():
+    if 'role' not in session or session['role'] != 'admin':
+        flash("Accès interdit.", 'error')
+        return redirect(url_for('login'))
+
+    if request.method == 'POST':
+        name = request.form['name']
+        password = request.form['password']
+        role = request.form['role']
+        add_user(name, password, role)
+        flash("Utilisateur ajouté avec succès.", 'success')
+        return redirect(url_for('admin_users'))
+
+    return render_template('add_user.html')
+
+@app.route('/admin/users/edit/<int:user_id>', methods=['GET', 'POST'])
+def edit_user_page(user_id):
+    if 'role' not in session or session['role'] != 'admin':
+        flash("Accès interdit.", 'error')
+        return redirect(url_for('login'))
+
+    if request.method == 'POST':
+        name = request.form['name']
+        password = request.form['password']
+        role = request.form['role']
+        update_user(user_id, name, password, role)
+        flash("Utilisateur modifié avec succès.", 'success')
+        return redirect(url_for('admin_users'))
+
+    return render_template('edit_user.html', user=get_user_by_id(user_id))
+
+@app.route('/admin/users/delete/<int:user_id>', methods=['POST'])
+def delete_user_page(user_id):
+    if 'role' not in session or session['role'] != 'admin':
+        flash("Accès interdit.", 'error')
+        return redirect(url_for('login'))
+
+    delete_user(user_id)
+    flash("Utilisateur supprimé avec succès.", 'success')
+    return redirect(url_for('admin_users'))
 
 @app.route('/totp-code')
 def get_totp_code():

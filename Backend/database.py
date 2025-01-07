@@ -60,3 +60,41 @@ def add_test():
     insert_admin("Loick", "coucou")
 
     print("Utilisateurs ajoutés avec succès !")
+
+def get_all_users():
+    with db.connect() as conn:
+        result = conn.execute(text("SELECT * FROM users")).fetchall()
+        return [dict(row) for row in result]
+    
+
+def add_user(name, password, role):
+    hashed_password = generate_password_hash(password)
+    with db.connect() as conn:
+        conn.execute(
+            text("INSERT INTO users (name, password, role) VALUES (:name, :password, :role)"),
+            {"name": name, "password": hashed_password, "role": role}
+        )
+        conn.commit()
+
+def update_user(user_id, name, password, role):
+    hashed_password = generate_password_hash(password)
+    with db.connect() as conn:
+        conn.execute(
+            text("UPDATE users SET name = :name, password = :password, role = :role WHERE id = :id"),
+            {"name": name, "password": hashed_password, "role": role, "id": user_id}
+        )
+        conn.commit()
+
+def get_user_by_id(user_id):
+    """Récupère un utilisateur spécifique par son ID."""
+    with db.connect() as conn:
+        result = conn.execute(text("SELECT * FROM users WHERE id = :id"), {"id": user_id}).fetchone()
+        return dict(result) if result else None
+
+def delete_user(user_id):
+    with db.connect() as conn:
+        conn.execute(
+            text("DELETE FROM users WHERE id = :id"),
+            {"id": user_id}
+        )
+        conn.commit()

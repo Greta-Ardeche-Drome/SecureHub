@@ -42,7 +42,6 @@ def login():
             if user:
                 log_event(user['id'], "Erreur d'authentification")
             else:
-                # Si l'utilisateur n'existe pas, on peut loguer un échec générique
                 log_event(None, "Tentative d'authentification échouée : utilisateur inconnu")
 
             flash('Nom d’utilisateur ou mot de passe incorrect', 'error')
@@ -140,7 +139,6 @@ def dashboard():
     
     # Récupérer les événements récents
     recent_events = get_recent_events()
-
     return render_template('admin_dashboard.html', users_count=users_count, system_status=system_status, recent_events=recent_events)
 
 @app.route('/totp-code')

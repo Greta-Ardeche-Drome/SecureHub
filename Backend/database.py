@@ -6,13 +6,13 @@ db = create_engine("sqlite:///app.db", echo=True, future=True)
 
 # Définir la requête SQL pour créer la table
 strSQLCreate = """
-        CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY, 
-            name VARCHAR(255) NOT NULL UNIQUE,
-            password VARCHAR(255) NOT NULL,
-            role VARCHAR(50) NOT NULL DEFAULT 'user'
-        );
-        """
+    CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY, 
+        name VARCHAR(255) NOT NULL UNIQUE,
+        password VARCHAR(255) NOT NULL,
+        role VARCHAR(50) NOT NULL DEFAULT 'user'
+    );
+"""
 
 strSQLCreateEvents = """
     CREATE TABLE IF NOT EXISTS events (
@@ -129,7 +129,7 @@ def check_system_status():
 def get_recent_events():
     """Récupère les derniers événements liés à l'authentification."""
     with db.connect() as conn:
-        result = conn.execute(text("SELECT * FROM events ORDER BY timestamp DESC LIMIT 5"))
+        result = conn.execute(text("SELECT events.event, events.timestamp, users.name AS user_name FROM events LEFT JOIN users ON events.user_id = users.id ORDER BY events.timestamp DESC LIMIT 20;")).fetchall()
         return [dict(row) for row in result]
     
 def log_event(user_id, event):
@@ -137,3 +137,4 @@ def log_event(user_id, event):
     with db.connect() as conn:
         conn.execute(text("INSERT INTO events (user_id, event) VALUES (:user_id, :event)"), 
                      {"user_id": user_id, "event": event})
+        conn.commit()

@@ -1,7 +1,8 @@
 from flask import Flask, render_template, redirect, url_for, request, session, flash, jsonify
-from database import init_db, get_user_by_name, add_test, get_all_users, add_user, update_user, get_user_by_id, delete_user
+from database import init_db, get_user_by_name, add_test, get_all_users, add_user, update_user, get_user_by_id, delete_user, get_all_users_count, check_system_status, get_recent_events, log_event
 from werkzeug.security import check_password_hash
 from totp_utils import generate_totp
+from datetime import datetime
 import os
 
 app = Flask(__name__, template_folder='../Frontend/templates')
@@ -28,6 +29,8 @@ def login():
             session['user_id'] = user['id']
             session['username'] = user['name']
             session['role'] = user['role']
+            log_event(user['id'], "Authentification réussie")
+
             role = user['role']
             if role == 'admin':
                 flash('Connexion réussie en tant qu’administrateur.', 'success')
@@ -36,6 +39,12 @@ def login():
                 flash('Connexion réussie en tant qu’utilisateur.', 'success')
                 return redirect(url_for('user_page'))
         else:
+            if user:
+                log_event(user['id'], "Erreur d'authentification")
+            else:
+                # Si l'utilisateur n'existe pas, on peut loguer un échec générique
+                log_event(None, "Tentative d'authentification échouée : utilisateur inconnu")
+
             flash('Nom d’utilisateur ou mot de passe incorrect', 'error')
 
     return render_template('login.html')
@@ -116,6 +125,23 @@ def delete_user_page(user_id):
     delete_user(user_id)
     flash("Utilisateur supprimé avec succès.", 'success')
     return redirect(url_for('admin_users'))
+
+@app.route('/admin/dashboard')
+def dashboard():
+    if 'role' not in session or session['role'] != 'admin':
+        flash("Accès interdit.", 'error')
+        return redirect(url_for('login'))
+
+    # Récupérer le nombre d'utilisateurs inscrits
+    users_count = get_all_users_count()
+    
+    # Vérification du statut global du système
+    system_status = check_system_status()
+    
+    # Récupérer les événements récents
+    recent_events = get_recent_events()
+
+    return render_template('admin_dashboard.html', users_count=users_count, system_status=system_status, recent_events=recent_events)
 
 @app.route('/totp-code')
 def get_totp_code():

@@ -14,10 +14,21 @@ strSQLCreate = """
         );
         """
 
+strSQLCreateEvents = """
+    CREATE TABLE IF NOT EXISTS events (
+        id INTEGER PRIMARY KEY,
+        user_id INTEGER,
+        event TEXT,
+        timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY(user_id) REFERENCES users(id)
+    );
+"""
+
 def init_db():
     # Créer la table 'users' si elle n'existe pas
     with db.connect() as conn:
         conn.execute(text(strSQLCreate))
+        conn.execute(text(strSQLCreateEvents))
         conn.commit()
 
 def insert_user(name, password):
@@ -98,3 +109,31 @@ def delete_user(user_id):
             {"id": user_id}
         )
         conn.commit()
+
+def get_all_users_count():
+    """Retourne le nombre total d'utilisateurs inscrits."""
+    with db.connect() as conn:
+        result = conn.execute(text("SELECT COUNT(*) FROM users"))
+        return result.scalar()  # Renvoie le nombre d'utilisateurs
+
+def check_system_status():
+    """Vérifie l'état du système, comme les erreurs de synchronisation."""
+    # Exemple simple : vérifier si la base de données est accessible
+    try:
+        with db.connect() as conn:
+            conn.execute(text("SELECT 1"))
+        return "Système opérationnel"
+    except Exception as e:
+        return f"Erreur : {str(e)}"
+    
+def get_recent_events():
+    """Récupère les derniers événements liés à l'authentification."""
+    with db.connect() as conn:
+        result = conn.execute(text("SELECT * FROM events ORDER BY timestamp DESC LIMIT 5"))
+        return [dict(row) for row in result]
+    
+def log_event(user_id, event):
+    """Enregistre un événement dans la base de données."""
+    with db.connect() as conn:
+        conn.execute(text("INSERT INTO events (user_id, event) VALUES (:user_id, :event)"), 
+                     {"user_id": user_id, "event": event})

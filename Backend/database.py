@@ -19,7 +19,7 @@ strSQLCreateEvents = """
         id INTEGER PRIMARY KEY,
         user_id INTEGER,
         event TEXT,
-        timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        timestamp TIMESTAMP DEFAULT (DATETIME('now', 'localtime')),
         FOREIGN KEY(user_id) REFERENCES users(id)
     );
 """
@@ -129,7 +129,7 @@ def check_system_status():
 def get_recent_events():
     """Récupère les derniers événements liés à l'authentification."""
     with db.connect() as conn:
-        result = conn.execute(text("SELECT events.event, events.timestamp, users.name AS user_name FROM events LEFT JOIN users ON events.user_id = users.id ORDER BY events.timestamp DESC LIMIT 20;")).fetchall()
+        result = conn.execute(text("SELECT events.event, strftime('%d/%m/%Y | %H:%M:%S', events.timestamp) AS formatted_timestamp, users.name AS user_name FROM events LEFT JOIN users ON events.user_id = users.id ORDER BY events.timestamp DESC LIMIT 20;")).fetchall()
         return [dict(row) for row in result]
     
 def log_event(user_id, event):

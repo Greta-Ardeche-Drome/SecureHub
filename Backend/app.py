@@ -1,7 +1,7 @@
-from flask import Flask, render_template, redirect, url_for, request, session, flash, jsonify
+from flask import Flask, render_template, send_file, redirect, url_for, request, session, flash, jsonify
 from database import init_db, get_user_by_name, add_test, get_all_users, add_user, update_user, get_user_by_id, delete_user, get_all_users_count, check_system_status, get_recent_events, log_event
 from werkzeug.security import check_password_hash
-from totp_utils import generate_totp
+from totp_utils import generate_totp, generate_qr_code
 from datetime import datetime
 import os
 
@@ -148,6 +148,11 @@ def get_totp_code():
 
     totp_code = generate_totp()
     return jsonify({"totp_code": totp_code})
+
+@app.route('/qr-code')
+def qr_code():
+    image_qr = generate_qr_code()
+    return send_file(image_qr, mimetype='image/png')
 
 if __name__ == '__main__':
     app.run(debug=True)

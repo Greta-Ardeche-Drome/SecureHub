@@ -5,7 +5,7 @@ from totp_utils import generate_totp, generate_qr_code
 from datetime import datetime
 import os
 
-app = Flask(__name__, template_folder='../Frontend/templates')
+app = Flask(__name__, template_folder='../Frontend/templates', static_folder='../Frontend/static')
 app.secret_key = 'your_secret_key'
 # Initialisation de la base de données
 if not os.path.exists('app.db'):

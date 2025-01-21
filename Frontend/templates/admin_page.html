@@ -4,20 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Code TOTP</title>
-    <script>
-        // Fonction pour actualiser le code TOTP toutes les 30 secondes
-        async function fetchTOTP() {
-            const response = await fetch('/totp-code');
-            const data = await response.json();
-            document.getElementById('totp-code').innerText = data.totp_code;
-        }
-
-        // Actualisation automatique
-        document.addEventListener('DOMContentLoaded', () => {
-            fetchTOTP();
-            setInterval(fetchTOTP, 30000); // Mise à jour toutes les 30 secondes
-        });
-    </script>
+    <script src="../static/js/reload_totp.js"></script>
 </head>
 <body>
     <h2>Bienvenue, {{ username }} (Administrateur)</h2>

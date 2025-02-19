@@ -5,8 +5,8 @@ from sqlalchemy import text
 
 # Configuration LDAP
 AD_SERVER = '192.168.1.149'
-AD_USER = 'securehub@securehub.fr'
-AD_PASSWORD = 'Iutval2607*'
+AD_USER = 'CN=securehub,CN=Users,DC=securehub,DC=fr'
+AD_PASSWORD = 'Testmdp2025!3'
 BASE_DN = 'OU=site,DC=securehub,DC=fr'
 
 def get_ad_users():

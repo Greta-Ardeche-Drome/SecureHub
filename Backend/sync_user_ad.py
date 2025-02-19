@@ -1,12 +1,13 @@
 from ldap3 import Server, Connection, ALL
-from models import db, User
-from app import app
+from database import db
+from werkzeug.security import generate_password_hash, check_password_hash
+from sqlalchemy import text
 
 # Configuration LDAP
-AD_SERVER = 'ldap://ad.entreprise.com'
-AD_USER = 'admin@entreprise.com'
-AD_PASSWORD = 'password'
-BASE_DN = 'OU=Utilisateurs,DC=entreprise,DC=com'
+AD_SERVER = '192.168.252.37'
+AD_USER = 'ldap@securehub.local'
+AD_PASSWORD = 'IutVal2607'
+BASE_DN = 'OU=Sites,DC=securehub,DC=local'
 
 def sync_users_from_ad():
     """
@@ -19,30 +20,30 @@ def sync_users_from_ad():
     conn.search(
         search_base=BASE_DN,
         search_filter='(objectClass=user)',
-        attributes=['sAMAccountName', 'mail', 'displayName']
+        attributes=['sAMAccountName', 'displayName']
     )
 
-    with app.app_context():
+    with db.connect() as conn_db:
         for entry in conn.entries:
             username = entry.sAMAccountName.value
-            email = entry.mail.value
-            display_name = entry.displayName.value
+            fullname = entry.displayName.value if entry.displayName else username
+            # Vérification si l'utilisateur existe déjà
+            existing_user = conn_db.execute(text("SELECT * FROM users WHERE name = :username"), {"username": username}).fetchone()
 
-            # Vérifiez si l'utilisateur existe déjà
-            if User.query.filter_by(username=username).first():
-                continue
+            if existing_user:
+                continue  # Passer l'utilisateur s'il est déjà dans la base
 
-            # Ajouter l'utilisateur à la base
-            user = User(
-                username=username,
-                totp_secret='',  # Généré ou attribué plus tard
-                recovery_phrase=None,
-                is_admin=False  # À personnaliser si nécessaire
+            # Générer le mot de passe par défaut
+            hashed_password = generate_password_hash("SecHub")
+
+            # Insérer l'utilisateur dans la base
+            conn_db.execute(
+                text("""
+                    INSERT INTO users (name, fullname, password, is_password_changed) 
+                    VALUES (:username, :fullname, :password, 0)  -- Le mot de passe n'a pas été changé
+                """),
+                {"username": username, "fullname": fullname, "password": hashed_password}
             )
-            db.session.add(user)
-        db.session.commit()
-        print("Synchronisation terminée avec succès.")
-
-# Exécutez uniquement si appelé directement
-if __name__ == '__main__':
-    sync_users_from_ad()
+        conn_db.commit()
+    
+    print("Synchronisation terminée avec succès.")

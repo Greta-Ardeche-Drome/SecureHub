@@ -1,8 +1,10 @@
 from flask import Flask, render_template, send_file, redirect, url_for, request, session, flash, jsonify
-from database import init_db, get_user_by_name, add_test, get_all_users, add_user, update_user, get_user_by_id, delete_user, get_all_users_count, check_system_status, get_recent_events, log_event
-from werkzeug.security import check_password_hash
+from database import init_db, get_user_by_name, add_default_admin, get_all_users, add_user, update_user, get_user_by_id, delete_user, get_all_users_count, check_system_status, get_recent_events, log_event, db
+from sync_user_ad import sync_users_from_ad
+from werkzeug.security import generate_password_hash, check_password_hash
 from totp_utils import generate_totp, generate_qr_code
 from datetime import datetime
+from sqlalchemy import text
 import os
 
 app = Flask(__name__, template_folder='../Frontend/templates', static_folder='../Frontend/static')
@@ -10,7 +12,9 @@ app.secret_key = 'your_secret_key'
 # Initialisation de la base de données
 if not os.path.exists('app.db'):
     init_db()
-    add_test()
+    add_default_admin()
+    sync_users_from_ad()
+    
 
 @app.route('/')
 def index():
@@ -28,16 +32,20 @@ def login():
         if user and check_password_hash(user['password'], password):
             session['user_id'] = user['id']
             session['username'] = user['name']
+            session['fullname'] = user['fullname']
             session['role'] = user['role']
             log_event(user['id'], "Authentification réussie")
 
-            role = user['role']
-            if role == 'admin':
-                flash('Connexion réussie en tant qu’administrateur.', 'success')
-                return redirect(url_for('admin_page'))
+            if user["is_password_changed"] == 0:
+                return redirect(url_for('change_password'))
             else:
-                flash('Connexion réussie en tant qu’utilisateur.', 'success')
-                return redirect(url_for('user_page'))
+                role = user['role']
+                if role == 'admin':
+                    flash('Connexion réussie en tant qu’administrateur.', 'success')
+                    return redirect(url_for('admin_page'))
+                else:
+                    flash('Connexion réussie en tant qu’utilisateur.', 'success')
+                    return redirect(url_for('user_page'))
         else:
             if user:
                 log_event(user['id'], "Erreur d'authentification")
@@ -54,6 +62,40 @@ def logout():
     flash('Déconnexion réussie.', 'success')
     return redirect(url_for('login'))
 
+@app.route('/change_password', methods=['GET', 'POST'])
+def change_password():
+    if 'user_id' not in session:  # Vérifie si l'utilisateur est connecté
+        flash("Vous devez être connecté pour changer votre mot de passe.", "error")
+        return redirect(url_for('login'))
+
+    user_id = session['user_id']  # Récupération de l'ID de l'utilisateur connecté
+
+    if request.method == 'POST':
+        new_password = request.form['new_password']
+        
+        # Hacher le nouveau mot de passe
+        hashed_password = generate_password_hash(new_password)
+
+        with db.connect() as conn:
+            # Mise à jour du mot de passe pour CE SEUL utilisateur
+            conn.execute(
+                text("""
+                    UPDATE users 
+                    SET password = :password, is_password_changed = 1 
+                    WHERE id = :user_id
+                """),
+                {"password": hashed_password, "user_id": user_id}
+            )
+            conn.commit()
+
+        flash("Votre mot de passe a été mis à jour avec succès !")
+        if session['role'] == 'admin':
+            return redirect(url_for('admin_page'))  # Rediriger vers la page utilisateur après le changement
+        else:
+            return redirect(url_for('user_page'))
+
+    return render_template('change_password.html')
+
 @app.route('/user')
 def user_page():
     if 'user_id' not in session or session.get('role') != 'user':
@@ -61,7 +103,7 @@ def user_page():
         return redirect(url_for('login'))
 
     totp_code = generate_totp()
-    return render_template('user_page.html', username=session['username'], totp_code=totp_code)
+    return render_template('user_page.html', username=session['fullname'], totp_code=totp_code)
 
 @app.route('/admin')
 def admin_page():
@@ -71,7 +113,7 @@ def admin_page():
 
     # Générer le code TOTP
     totp_code = generate_totp()
-    return render_template('admin_page.html', username=session['username'], totp_code=totp_code)
+    return render_template('admin_page.html', username=session['fullname'], totp_code=totp_code)
 
 @app.route('/admin/users', methods=['GET'])
 def admin_users():

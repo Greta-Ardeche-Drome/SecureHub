@@ -9,8 +9,10 @@ strSQLCreate = """
     CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY, 
         name VARCHAR(255) NOT NULL UNIQUE,
+        fullname VARCHAR(255) NOT NULL,
         password VARCHAR(255) NOT NULL,
-        role VARCHAR(50) NOT NULL DEFAULT 'user'
+        role VARCHAR(50) NOT NULL DEFAULT 'user',
+        is_password_changed BOOLEAN NOT NULL DEFAULT 0
     );
 """
 
@@ -31,28 +33,28 @@ def init_db():
         conn.execute(text(strSQLCreateEvents))
         conn.commit()
 
-def insert_user(name, password):
+def insert_user(name, fullname, password):
     # Ajouter un utilisateur avec un mot de passe haché
     hashed_password = generate_password_hash(password)
     strSQLInsert = """
-        INSERT INTO users (name, password) VALUES (:name, :password);
+        INSERT INTO users (name, fullname, password) VALUES (:name, :fullname, :password);
         """
     with db.connect() as conn:
         try:
-            conn.execute(text(strSQLInsert), {"name": name, "password": hashed_password})
+            conn.execute(text(strSQLInsert), {"name": name, "fullname": fullname, "password": hashed_password})
             conn.commit()
         except Exception as e:
             print(f"Erreur lors de l'insertion : {e}")
 
-def insert_admin(name, password):
+def insert_admin(name, fullname, password):
     # Ajouter un utilisateur avec un mot de passe haché
     hashed_password = generate_password_hash(password)
     strSQLInsert = """
-        INSERT INTO users (name, password, role) VALUES (:name, :password, :role);
+        INSERT INTO users (name, fullname, password, role) VALUES (:name, :fullname, :password, :role);
         """
     with db.connect() as conn:
         try:
-            conn.execute(text(strSQLInsert), {"name": name, "password": hashed_password, "role": "admin"})
+            conn.execute(text(strSQLInsert), {"name": name, "fullname": fullname, "password": hashed_password, "role": "admin"})
             conn.commit()
         except Exception as e:
             print(f"Erreur lors de l'insertion : {e}")
@@ -64,13 +66,11 @@ def get_user_by_name(name):
         result = conn.execute(text(strSQLSelect), {"name": name}).fetchone()
         return result
 
-def add_test():
+def add_default_admin():
     
-    insert_user("Nono", "password63")
-    insert_user("Jojo", "password64")
-    insert_admin("Loick", "coucou")
+    insert_admin("SecureHub", "SecureHub", "Secaccess")
 
-    print("Utilisateurs ajoutés avec succès !")
+    print("Administrateur par défaut importés avec succès !")
 
 def get_all_users():
     with db.connect() as conn:

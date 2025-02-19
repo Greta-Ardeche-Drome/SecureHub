@@ -1,11 +1,13 @@
 from flask import Flask, render_template, send_file, redirect, url_for, request, session, flash, jsonify
 from database import init_db, get_user_by_name, add_default_admin, get_all_users, add_user, update_user, get_user_by_id, delete_user, get_all_users_count, check_system_status, get_recent_events, log_event, db
-from sync_user_ad import sync_users_from_ad
+from sync_user_ad import initialize_users_from_ad, update_users_from_ad
 from werkzeug.security import generate_password_hash, check_password_hash
 from totp_utils import generate_totp, generate_qr_code
 from datetime import datetime
 from sqlalchemy import text
 import os
+import threading
+import time
 
 app = Flask(__name__, template_folder='../Frontend/templates', static_folder='../Frontend/static')
 app.secret_key = 'your_secret_key'
@@ -13,8 +15,17 @@ app.secret_key = 'your_secret_key'
 if not os.path.exists('app.db'):
     init_db()
     add_default_admin()
-    sync_users_from_ad()
-    
+    initialize_users_from_ad()
+
+def sync_ad_users_periodically():
+    """Fonction qui interroge l'AD toutes les 3 minutes pour synchroniser les utilisateurs."""
+    while True:
+        time.sleep(180) # Attend 3 minutes (180 secondes)
+        update_users_from_ad()  # Appelle la fonction pour mettre à jour les utilisateurs
+                
+
+#Démarre le thread de synchronisation des utilisateurs AD
+threading.Thread(target=sync_ad_users_periodically, daemon=True).start()
 
 @app.route('/')
 def index():

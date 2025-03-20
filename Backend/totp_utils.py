@@ -31,3 +31,7 @@ def generate_qr_code():
     img.save(buf)
     buf.seek(0)
     return buf
+
+def response_totp():
+    totp = pyotp.TOTP(SECRET_KEY)
+    return totp.now()

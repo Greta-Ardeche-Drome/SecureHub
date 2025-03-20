@@ -2,7 +2,7 @@ from flask import Flask, render_template, send_file, redirect, url_for, request,
 from database import init_db, get_user_by_name, add_default_admin, get_all_users, add_user, update_user, get_user_by_id, delete_user, get_all_users_count, check_system_status, get_recent_events, log_event, db
 from sync_user_ad import initialize_users_from_ad, update_users_from_ad
 from werkzeug.security import generate_password_hash, check_password_hash
-from totp_utils import generate_totp, generate_qr_code
+from totp_utils import generate_totp, generate_qr_code, response_totp
 from datetime import datetime
 from sqlalchemy import text
 import os
@@ -206,6 +206,20 @@ def get_totp_code():
 def qr_code():
     image_qr = generate_qr_code()
     return send_file(image_qr, mimetype='image/png')
+
+@app.route('/verify_totp', methods=['POST'])
+def verify_totp():
+    data = request.json
+    totp_code = data.get("totp_code")
+
+    if not totp_code:
+        return jsonify({"success": False, "message": "Données incomplètes"}), 400
+
+    totp = response_totp()
+    if totp.verify(totp_code):
+        return jsonify({"success": True, "message": "Code TOTP valide"})
+    else:
+        return jsonify({"success": False, "message": "Code TOTP invalide"}), 403
 
 if __name__ == '__main__':
     app.run(debug=True)

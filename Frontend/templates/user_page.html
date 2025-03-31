@@ -4,9 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Code TOTP</title>
+    <link rel="stylesheet" href="/static/css/styles_user_page.css">
     <script src="../static/js/reload_totp.js"></script>
 </head>
 <body>
+    <header>
+        <img src="/static/img/SecureHub.png" alt="Logo SecureHub" class="logo">
+    </header>
     <h2>Bienvenue, {{ username }} (Utilisateur)</h2>
     <p>Voici votre code TOTP :</p>
     <h1 id="totp-code">{{ totp_code }}</h1>

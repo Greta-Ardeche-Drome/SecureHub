@@ -78,21 +78,21 @@ def get_all_users():
         return [dict(row) for row in result]
     
 
-def add_user(name, password, role):
+def add_user(name, fullname, password, role):
     hashed_password = generate_password_hash(password)
     with db.connect() as conn:
         conn.execute(
-            text("INSERT INTO users (name, password, role) VALUES (:name, :password, :role)"),
-            {"name": name, "password": hashed_password, "role": role}
+            text("INSERT INTO users (name, fullname, password, role) VALUES (:name, :fullname, :password, :role)"),
+            {"name": name, "fullname": fullname, "password": hashed_password, "role": role}
         )
         conn.commit()
 
-def update_user(user_id, name, password, role):
+def update_user(user_id, name, fullname, password, role):
     hashed_password = generate_password_hash(password)
     with db.connect() as conn:
         conn.execute(
-            text("UPDATE users SET name = :name, password = :password, role = :role WHERE id = :id"),
-            {"name": name, "password": hashed_password, "role": role, "id": user_id}
+            text("UPDATE users SET name = :name, fullname = :fullname, password = :password, role = :role WHERE id = :id"),
+            {"name": name, "fullname": fullname, "password": hashed_password, "role": role, "id": user_id}
         )
         conn.commit()
 

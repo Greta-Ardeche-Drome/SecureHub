@@ -7,6 +7,9 @@
     <link rel="stylesheet" href="/static/css/styles_admin_table.css">
 </head>
 <body>
+    <header>
+        <img src="/static/img/SecureHub.png" alt="Logo SecureHub" class="logo">
+    </header>
     <h2>Gestion des utilisateurs</h2>
     <a href="/admin" class="btn-back">Retour à l'administration</a>
     <a href="/admin/users/add" class="btn-add">Ajouter un utilisateur</a>
@@ -14,7 +17,8 @@
         <thead>
             <tr>
                 <th>ID</th>
-                <th>Nom</th>
+                <th>Identifiant</th>
+                <th>Nom complet</th>
                 <th>Rôle</th>
                 <th>Actions</th>
             </tr>
@@ -24,6 +28,7 @@
             <tr>
                 <td>{{ user.id }}</td>
                 <td>{{ user.name }}</td>
+                <td>{{ user.fullname }}</td>
                 <td>{{ user.role }}</td>
                 <td>
                     <!-- Bouton modifier -->

@@ -147,9 +147,10 @@ def add_user_page():
 
     if request.method == 'POST':
         name = request.form['name']
+        fullname = request.form['fullname']
         password = request.form['password']
         role = request.form['role']
-        add_user(name, password, role)
+        add_user(name, fullname, password, role)
         flash("Utilisateur ajouté avec succès.", 'success')
         return redirect(url_for('admin_users'))
 
@@ -163,9 +164,10 @@ def edit_user_page(user_id):
 
     if request.method == 'POST':
         name = request.form['name']
+        fullname = request.form['fullname']
         password = request.form['password']
         role = request.form['role']
-        update_user(user_id, name, password, role)
+        update_user(user_id, name, fullname, password, role)
         flash("Utilisateur modifié avec succès.", 'success')
         return redirect(url_for('admin_users'))
 

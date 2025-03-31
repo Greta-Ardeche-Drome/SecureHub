@@ -4,12 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ajouter un utilisateur</title>
+    <link rel="stylesheet" href="/static/css/styles_add_user.css">
 </head>
 <body>
+    <header>
+        <img src="/static/img/SecureHub.png" alt="Logo SecureHub" class="logo">
+    </header>
     <h2>Ajouter un utilisateur</h2>
     <form action="" method="post">
-        <label for="name">Nom :</label>
+        <label for="name">Identifiant:</label>
         <input type="text" id="name" name="name" required><br>
+        <label for="name">Nom complet :</label>
+        <input type="text" id="fullname" name="fullname" required><br>
         <label for="password">Mot de passe :</label>
         <input type="password" id="password" name="password" required><br>
         <label for="role">Rôle :</label>

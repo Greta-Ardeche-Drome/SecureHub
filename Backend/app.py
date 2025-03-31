@@ -11,6 +11,9 @@ import time
 
 app = Flask(__name__, template_folder='../Frontend/templates', static_folder='../Frontend/static')
 app.secret_key = 'your_secret_key'
+
+last_successful_auth = None
+
 # Initialisation de la base de données
 if not os.path.exists('app.db'):
     init_db()
@@ -213,13 +216,25 @@ def verify_totp():
     totp_code = data.get("totp_code")
 
     if not totp_code:
-        return jsonify({"success": False, "message": "Données incomplètes"}), 400
+        return jsonify({"success": False, "message": "Code TOTP requis"}), 400
 
     totp = response_totp()
+    
     if totp.verify(totp_code):
+        global last_successful_auth
+        last_successful_auth = time.time()  # Stocker l'heure de validation
         return jsonify({"success": True, "message": "Code TOTP valide"})
-    else:
-        return jsonify({"success": False, "message": "Code TOTP invalide"}), 403
+    
+    return jsonify({"success": False, "message": "Code TOTP invalide"}), 403
+
+@app.route('/check_auth', methods=['POST'])
+def check_auth():
+    """ Vérifie si l'utilisateur a validé son TOTP récemment """
+    global last_successful_auth
+    if last_successful_auth and time.time() - last_successful_auth < 60:
+        return jsonify({"success": True})
+    
+    return jsonify({"success": False})
 
 if __name__ == '__main__':
     app.run(debug=True)

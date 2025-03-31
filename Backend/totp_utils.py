@@ -32,6 +32,8 @@ def generate_qr_code():
     buf.seek(0)
     return buf
 
-def response_totp():
+def response_totp(totp_code):
     totp = pyotp.TOTP(SECRET_KEY)
-    return totp.now()
+    return totp.verify(totp_code)
+    
+

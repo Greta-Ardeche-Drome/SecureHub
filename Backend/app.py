@@ -217,10 +217,8 @@ def verify_totp():
 
     if not totp_code:
         return jsonify({"success": False, "message": "Code TOTP requis"}), 400
-
-    totp = response_totp()
     
-    if totp.verify(totp_code):
+    if response_totp(totp_code):
         global last_successful_auth
         last_successful_auth = time.time()  # Stocker l'heure de validation
         return jsonify({"success": True, "message": "Code TOTP valide"})

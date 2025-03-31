@@ -4,24 +4,31 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Connexion</title>
+    <link rel="stylesheet" href="/static/css/styles_login.css">
 </head>
 <body>
-    <h2>Connexion</h2>
-    <form method="POST" action="/login">
-        <label for="username">Nom d'utilisateur :</label>
-        <input type="text" name="username" id="username" required><br><br>
-        <label for="password">Mot de passe :</label>
-        <input type="password" name="password" id="password" required><br><br>
-        <button type="submit">Se connecter</button>
-    </form>
-    {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-        <ul>
-        {% for category, message in messages %}
-            <li class="{{ category }}">{{ message }}</li>
-        {% endfor %}
-        </ul>
-    {% endif %}
-    {% endwith %}
+    <div class="container">
+        <img src="/static/img/SecureHub.png" alt="Logo SecureHub" class="logo">
+        <h2>Connexion</h2>
+        <form method="POST" action="/login">
+            <label for="username">Nom d'utilisateur :</label>
+            <input type="text" name="username" id="username" required>
+            
+            <label for="password">Mot de passe :</label>
+            <input type="password" name="password" id="password" required>
+            
+            <button type="submit">Se connecter</button>
+        </form>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <ul>
+            {% for category, message in messages %}
+                <li class="{{ category }}">{{ message }}</li>
+            {% endfor %}
+            </ul>
+        {% endif %}
+        {% endwith %}
+    </div>
 </body>
 </html>

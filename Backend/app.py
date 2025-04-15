@@ -199,16 +199,12 @@ def dashboard():
     recent_events = get_recent_events()
     return render_template('admin_dashboard.html', users_count=users_count, system_status=system_status, recent_events=recent_events)
 
-@app.route('/totp-code')
-def get_totp_code():
-    if 'username' not in session:
-        return jsonify({"error": "Unauthorized"}), 401
-
-    totp_code = generate_totp()
-    return jsonify({"totp_code": totp_code})
-
 @app.route('/qr-code')
 def qr_code():
+    if 'username' not in session:
+        flash("Accès interdit.", 'error')
+        return redirect(url_for('login'))
+    
     image_qr = generate_qr_code()
     return send_file(image_qr, mimetype='image/png')
 
@@ -221,20 +217,27 @@ def verify_totp():
         return jsonify({"success": False, "message": "Code TOTP requis"}), 400
     
     if response_totp(totp_code):
-        global last_successful_auth
-        last_successful_auth = time.time()  # Stocker l'heure de validation
         return jsonify({"success": True, "message": "Code TOTP valide"})
     
     return jsonify({"success": False, "message": "Code TOTP invalide"}), 403
 
-@app.route('/check_auth', methods=['POST'])
-def check_auth():
-    """ Vérifie si l'utilisateur a validé son TOTP récemment """
-    global last_successful_auth
-    if last_successful_auth and time.time() - last_successful_auth < 60:
-        return jsonify({"success": True})
+@app.route('/verify_totp_user', methods=['POST'])
+def verify_totp_user():
+    data = request.json
+    username = data.get("username")
+    totp_code = data.get("totp_code")
+
+    if not username or not totp_code:
+        return jsonify({"success": False, "message": "Nom d'utilisateur et code TOTP requis"}), 400
     
-    return jsonify({"success": False})
+    user = get_user_by_name(username)
+    if not user:
+        return jsonify({"success": False, "message": "Utilisateur non trouvé"}), 404
+    
+    if response_totp(totp_code):
+        return jsonify({"success": True, "message": "Code TOTP valide et utilisateur reconnu"})
+    
+    return jsonify({"success": False, "message": "Code TOTP invalide"}), 403
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -199,6 +199,14 @@ def dashboard():
     recent_events = get_recent_events()
     return render_template('admin_dashboard.html', users_count=users_count, system_status=system_status, recent_events=recent_events)
 
+@app.route('/totp-code')
+def get_totp_code():
+    if 'username' not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    totp_code = generate_totp()
+    return jsonify({"totp_code": totp_code})
+
 @app.route('/qr-code')
 def qr_code():
     if 'username' not in session:

@@ -1,15 +1,24 @@
 import pyotp
 import qrcode
+import os
 from io import BytesIO
 
 # Clé secrète pour l'ensemble de l'entreprise
-SECRET_KEY = "4OT7FRJ3A2T3GRDU5L2PYMW3T2T6DYJ5"  # Générer une clé avec pyotp.random_base32()
+
+def create_secret_key(filepath=".secret_totp"):
+    secret = pyotp.random_base32()
+    with open(filepath, "w") as file:
+        file.write(secret)
+
+def get_secret_key(filepath=".secret_totp"):
+    with open(filepath, "r") as file:
+        return file.read().strip()
 
 def generate_totp():
     """
     Génère un code TOTP valable 30 secondes.
     """
-    totp = pyotp.TOTP(SECRET_KEY)
+    totp = pyotp.TOTP(get_secret_key(".secret_totp"))
     return totp.now()
 
 def generate_qr_code():
@@ -17,8 +26,8 @@ def generate_qr_code():
     Génère un QR code pour configurer TOTP sur une application comme Okta.
     """
     # Création de l'URI TOTP compatible avec Google Authenticator et Okta
-    totp = pyotp.TOTP(SECRET_KEY)
-    otp_uri = totp.provisioning_uri(name="EntrepriseApp:Utilisateur", issuer_name="EntrepriseApp")
+    totp = pyotp.TOTP(get_secret_key(".secret_totp"))
+    otp_uri = totp.provisioning_uri(name="SecureHub:Utilisateur", issuer_name="SecureHub")
 
     # Génération du QR code
     qr = qrcode.QRCode(version=1, box_size=10, border=5)
@@ -33,7 +42,7 @@ def generate_qr_code():
     return buf
 
 def response_totp(totp_code):
-    totp = pyotp.TOTP(SECRET_KEY)
+    totp = pyotp.TOTP(get_secret_key(".secret_totp"))
     return totp.verify(totp_code)
     
 

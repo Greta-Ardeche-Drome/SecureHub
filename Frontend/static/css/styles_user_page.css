@@ -42,13 +42,19 @@ h1 {
     margin: 10px 0;
 }
 
-a {
-    color: #007bff;
-    text-decoration: none;
+a, button {
     font-size: 16px;
+    text-decoration: none;
     margin-top: 20px;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    background-color: #007bff;
+    color: white;
 }
 
-a:hover {
-    text-decoration: underline;
+a:hover, button:hover {
+    background-color: #0056b3;
 }
+

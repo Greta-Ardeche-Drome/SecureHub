@@ -2,7 +2,7 @@ from flask import Flask, render_template, send_file, redirect, url_for, request,
 from database import init_db, get_user_by_name, add_default_admin, get_all_users, add_user, update_user, get_user_by_id, delete_user, get_all_users_count, check_system_status, get_recent_events, log_event, db
 from sync_user_ad import initialize_users_from_ad, update_users_from_ad
 from werkzeug.security import generate_password_hash, check_password_hash
-from totp_utils import generate_totp, generate_qr_code, response_totp
+from totp_utils import generate_totp, generate_qr_code, response_totp, create_secret_key
 from datetime import datetime
 from sqlalchemy import text
 import os
@@ -19,6 +19,9 @@ if not os.path.exists('app.db'):
     init_db()
     add_default_admin()
     initialize_users_from_ad()
+
+if not os.path.exists('.secret_totp'):
+    create_secret_key(".secret_totp")
 
 def sync_ad_users_periodically():
     """Fonction qui interroge l'AD toutes les 3 minutes pour synchroniser les utilisateurs."""
